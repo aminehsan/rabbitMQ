@@ -7,9 +7,9 @@ class RabbitMQ:
     """A Python class for interacting with RabbitMQ, a message broker."""
 
     def __init__(self, host: str, port: int, username: str, password: str, heartbeat: int = None) -> None:
-        self.__connection(ConnectionParameters(host=host, port=port, credentials=PlainCredentials(username=username, password=password), heartbeat=heartbeat))
+        self.__connection = self.__connecting(ConnectionParameters(host=host, port=port, credentials=PlainCredentials(username=username, password=password), heartbeat=heartbeat))
 
-    def __connection(self, parameters: ConnectionParameters) -> None:
+    def __connecting(self, parameters: ConnectionParameters) -> BlockingConnection:
         """Connect to RabbitMQ server."""
         counter = 0
         while True:
@@ -17,7 +17,7 @@ class RabbitMQ:
             try:
                 connection = BlockingConnection(parameters=parameters)
                 self.__channel = connection.channel()
-                return
+                return connection
             except Exception as e:
                 print(e)
                 if counter >= 5:
@@ -48,3 +48,7 @@ class RabbitMQ:
         """Accept the message and requeue it to the end of the same queue."""
         self.send(queue=method.routing_key, body=body)
         self.accept(method=method)
+
+    def close(self) -> None:
+        """Close the RabbitMQ server connection."""
+        self.__connection.close()
