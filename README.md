@@ -4,6 +4,8 @@
 ```bash
 broker = RabbitMQ(host='...', port=..., username='...', password='...', heartbeat=...)
 
+broker.declare_queues(names=['...',], arguments=...)
+
 def callback(ch, method, properties, body):
     data = body
     broker.accept(method=method)
